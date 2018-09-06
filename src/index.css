@@ -46,6 +46,7 @@ html, body{
 .send-message-form{
   grid-area: f;
 }
+
 .sidebar{
   grid-area: s;
 }
@@ -66,7 +67,14 @@ html, body{
   overflow: scroll;
   height: 100%;
 }
-
+.sidebar > ul {
+  list-style-type: none;    
+  padding: 0;
+  overflow: scoll;
+}
+.user{
+  
+}
 .rooms-list > ul {
   list-style-type: none;    
   padding: 0;
@@ -159,6 +167,9 @@ html, body{
   height: 100%;
   overflow: scroll;
   background: var(--secondary-color);
+}
+.message-active{
+  text-align:right;
 }
 
 .message-list .join-room {

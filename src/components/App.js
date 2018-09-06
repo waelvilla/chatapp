@@ -53,7 +53,6 @@ class App extends Component {
     .then(currentUser =>{
       this.currentUser=currentUser
       this.getRooms()
-      this.setUsersState()
 
     })
     .catch(err => console.log('err on connecting: ', err)
@@ -68,7 +67,7 @@ class App extends Component {
         joinedRooms:this.currentUser.rooms,
 
       })
-      console.log("users: ",this.state.joinedRooms[0].userIds)
+      // console.log("users: ",this.state.joinedRooms[0].userIds)
 
     })
     .catch(err => console.log('error in getJoinableRooms', err)
@@ -90,7 +89,7 @@ class App extends Component {
       this.setState({
         roomId: room.id,
       })
-      console.log("userIds:",room.userIds)
+      this.setUsersState(room.users)
       this.getRooms()
 
     })
@@ -115,18 +114,29 @@ class App extends Component {
     )
     
   }
-  setUsersState(){
-    let online=[]
-    let offline=[]
-    let store=this.currentUser.presenceStore.store
-    for(let user in store){
-      let state=store[user].state
-      if(state=="online")
-        online.push(user)
-      else
-        offline.push(user)  
-    }
+  setUsersState(users){
+    let onlineUsers=[]
+    let offlineUsers=[]
+    // let store=this.currentUser.presenceStore.store
+    // for(let user in store){
+    //   let state=store[user].state
+    //   if(state=="online")
+    //     online.push(user)
+    //   else
+    //     offline.push(user)  
+    // }
     
+    users.forEach((user)=>{
+      if(user.presence.state=="online")
+      onlineUsers.push(user)
+      else
+      offlineUsers.push(user)
+    })
+    this.setState({
+      onlineUsers,
+      offlineUsers
+    })
+
   }
 
   handleAddUser(userId){
@@ -158,10 +168,10 @@ class App extends Component {
             joinableRooms={this.state.joinableRooms} 
             subToRoom={this.subscribeToRoom} 
             activeRoom={this.state.roomId} />
-          <MessageList messages={this.state.messages} roomId={this.state.roomId}/>
+          <MessageList messages={this.state.messages} roomId={this.state.roomId} userId={this.state.userId}/>
           <SendMessageForm disabled={!this.state.roomId} sendMessage={this.handleSendMessage}/>
           <NewRoomForm onSubmit={this.handleNewRoom} />
-          <Sidebar inRoom={this.state.roomId}/>
+          <Sidebar inRoom={this.state.roomId} onlineUsers={this.state.onlineUsers} offlineUsers={this.state.offlineUsers} />
         </div>
       )
     }

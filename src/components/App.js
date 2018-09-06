@@ -23,6 +23,7 @@ class App extends Component {
     this.db=['e89eacc690fe360f76dbdc3dc6893b3f','9446a28dbec56d2d77f94f7c9f7e6c5a']
     this.handleAddUser=this.handleAddUser.bind(this)
     this.getRooms=this.getRooms.bind(this)
+    this.setOnlineUser=this.setOnlineUser.bind(this)
     this.subscribeToRoom=this.subscribeToRoom.bind(this)
     this.handleSendMessage=this.handleSendMessage.bind(this)
     this.handleNewRoom=this.handleNewRoom.bind(this)
@@ -41,6 +42,7 @@ class App extends Component {
     .then(currentUser =>{
       this.currentUser=currentUser
       this.getRooms()
+      this.setOnlineUser()
     })
     .catch(err => console.log('err on connecting: ', err)
     )
@@ -49,7 +51,7 @@ class App extends Component {
     console.log("---componentWillReceiveProps---")
     
   }
-  getRooms(){
+  getRooms(){    
     this.currentUser.getJoinableRooms()
     .then(joinableRooms =>{
       this.setState({
@@ -101,7 +103,14 @@ class App extends Component {
     )
     
   }
-
+  setOnlineUser(){
+    
+    console.log(this.currentUser);
+    
+    if(this.currentUser.presence.state==='online')
+      console.log(this.currentUser.name,'is online');
+    
+  }
   handleAddUser(userId){
     this.setState({
       userId

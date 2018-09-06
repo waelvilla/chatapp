@@ -7,7 +7,9 @@ class Sidebar extends React.Component  {
         return(
             <div className="sidebar">
                 {this.props.inRoom
-                    ?<h3> Online Users </h3>
+                    ? <div>
+                         <h3> Online Users </h3>
+                        </div>
                     : null
                 }
                 

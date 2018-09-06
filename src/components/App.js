@@ -18,22 +18,33 @@ class App extends Component {
       joinableRooms: [],
       joinedRooms:[],
       messages: [],
-      wrongPass:false
+      onlineUsers:[],
+      offlineUsers:[],
+      wrongPass:false,
+      
     }
-    this.db=['e89eacc690fe360f76dbdc3dc6893b3f','9446a28dbec56d2d77f94f7c9f7e6c5a']
+    this.db=['e89eacc690fe360f76dbdc3dc6893b3f','9446a28dbec56d2d77f94f7c9f7e6c5a','42861968773f1949a619727daba9e7d8']
     this.handleAddUser=this.handleAddUser.bind(this)
     this.getRooms=this.getRooms.bind(this)
-    this.setOnlineUser=this.setOnlineUser.bind(this)
     this.subscribeToRoom=this.subscribeToRoom.bind(this)
     this.handleSendMessage=this.handleSendMessage.bind(this)
     this.handleNewRoom=this.handleNewRoom.bind(this)
     this.handleLogin=this.handleLogin.bind(this)
+    this.initialize=this.initialize.bind(this)
+    this.setUsersState=this.setUsersState.bind(this)
   }
 
-  initialize(){
+  componentDidMount(){
+    if(this.state.userId)
+      this.initialize()
+  }
+
+  initialize(userId){
+    if(this.state.userId)
+    userId=this.state.userId
     const chatManager=new ChatManager({
       instanceLocator,
-      userId: this.state.userId,
+      userId,
       tokenProvider: new TokenProvider({
         url:tokenUrl
       })
@@ -42,15 +53,13 @@ class App extends Component {
     .then(currentUser =>{
       this.currentUser=currentUser
       this.getRooms()
-      this.setOnlineUser()
+      this.setUsersState()
+
     })
     .catch(err => console.log('err on connecting: ', err)
     )
   }
-  componentWillReceiveProps(){
-    console.log("---componentWillReceiveProps---")
-    
-  }
+
   getRooms(){    
     this.currentUser.getJoinableRooms()
     .then(joinableRooms =>{
@@ -59,6 +68,8 @@ class App extends Component {
         joinedRooms:this.currentUser.rooms,
 
       })
+      console.log("users: ",this.state.joinedRooms[0].userIds)
+
     })
     .catch(err => console.log('error in getJoinableRooms', err)
     )
@@ -78,9 +89,10 @@ class App extends Component {
     .then(room =>{
       this.setState({
         roomId: room.id,
-
       })
+      console.log("userIds:",room.userIds)
       this.getRooms()
+
     })
     .catch(err => console.log("error in subscribeToRoom: " , err)
     )
@@ -103,14 +115,20 @@ class App extends Component {
     )
     
   }
-  setOnlineUser(){
-    
-    console.log(this.currentUser);
-    
-    if(this.currentUser.presence.state==='online')
-      console.log(this.currentUser.name,'is online');
+  setUsersState(){
+    let online=[]
+    let offline=[]
+    let store=this.currentUser.presenceStore.store
+    for(let user in store){
+      let state=store[user].state
+      if(state=="online")
+        online.push(user)
+      else
+        offline.push(user)  
+    }
     
   }
+
   handleAddUser(userId){
     this.setState({
       userId
@@ -118,21 +136,22 @@ class App extends Component {
   }
   handleLogin(userId,password){
     
-    if(this.db.includes(md5(userId+':'+password)))
+    if(this.db.includes(md5(userId+':'+password))){
       this.handleAddUser(userId)
+      this.initialize(userId)
+    }
     else
       this.setState({wrongPass:true})
   }
 
   render() {
     
-    if(!this.state.userId){
+    if(!this.state.userId){            
       return(
-        <Login username={this.handleAddUser} creds={this.handleLogin} wrongPass={this.state.wrongPass}/>
+        <Login username={this.handleAddUser} creds={this.handleLogin} wrongPass={this.state.wrongPass} initialize={this.initialize}/>
       )
     }
     else{
-      this.initialize()
       return (
         <div className="app">
           <RoomList joinedRooms={this.state.joinedRooms} 

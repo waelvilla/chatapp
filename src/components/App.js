@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { tokenUrl, instanceLocator } from "./config";
+import { tokenUrl, instanceLocator, key } from "./config";
 import { ChatManager, TokenProvider } from "@pusher/chatkit";
 import md5 from "md5";
 import Login from "./Login";
@@ -47,14 +47,18 @@ class App extends Component {
     if (this.state.userId) userId = this.state.userId;
     const chatManager = new ChatManager({
       instanceLocator,
+      key,
       userId,
       tokenProvider: new TokenProvider({
         url: tokenUrl
       })
     });
+    
     chatManager
       .connect()
       .then(currentUser => {
+        console.log("made it this far");
+        
         this.currentUser = currentUser;
         this.getRooms();
       })
